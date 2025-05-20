@@ -375,8 +375,7 @@ class ModelDownloader:
             # 准备下载参数
             download_kwargs = {
                 "model_id": model_id,
-                "cache_dir": str(save_path),
-                "force_download": True
+                "local_dir": str(save_path)
             }
             
             # 添加令牌（如果提供）
