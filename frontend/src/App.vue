@@ -48,6 +48,7 @@
     <footer class="app-footer">
       <p>&copy; {{ currentYear }} LLM Weights Downloader</p>
     </footer>
+    <StagewiseToolbar v-if="isDev" :config="stagewiseConfig" />
   </div>
 </template>
 
@@ -57,6 +58,11 @@ import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { Download, Files, List, InfoFilled } from '@element-plus/icons-vue';
 
+let StagewiseToolbar = null;
+if (process.env.NODE_ENV === 'development') {
+  ({ StagewiseToolbar } = await import('@stagewise/toolbar-vue'));
+}
+
 export default {
   name: 'App',
   
@@ -65,6 +71,7 @@ export default {
     Files,
     List,
     InfoFilled,
+    ...(StagewiseToolbar && { StagewiseToolbar }),
   },
   
   setup() {
@@ -85,6 +92,12 @@ export default {
     
     // 当前年份
     const currentYear = new Date().getFullYear();
+    
+    // Stagewise config
+    const stagewiseConfig = {
+      plugins: []
+    };
+    const isDev = process.env.NODE_ENV === 'development';
     
     // 切换深色模式
     const toggleDarkMode = () => {
@@ -116,6 +129,8 @@ export default {
       menuActiveColor,
       currentYear,
       toggleDarkMode,
+      stagewiseConfig,
+      isDev,
     };
   },
 };

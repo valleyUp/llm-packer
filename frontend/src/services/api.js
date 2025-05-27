@@ -35,7 +35,12 @@ apiClient.interceptors.response.use(
 const api = {
   // 检查模型大小
   checkModelSize(params) {
-    return apiClient.post('/check-size', params);
+    return apiClient.post('/check-size', params)
+      .catch(error => {
+        console.error('API error in checkModelSize:', error);
+        // 重新抛出错误，让 store 来处理
+        throw error;
+      });
   },
   
   // 开始下载任务

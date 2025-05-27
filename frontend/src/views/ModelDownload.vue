@@ -13,8 +13,18 @@
         
         <el-form-item label="Model ID/URL" prop="modelId">
           <el-input v-model="form.modelId" placeholder="Enter Model ID or URL"></el-input>
-          <div class="form-hint" v-if="modelSizeInfo">
-            {{ modelSizeInfo }}
+          <div class="form-hint">
+            <el-skeleton v-if="isCheckingSize" :rows="1" animated />
+            <template v-else-if="store.state.model.modelSizeInfo">
+              <div class="model-size-info-container">
+                <el-alert
+                  :type="modelSizeAlertType"
+                  :title="modelSizeDisplay"
+                  show-icon
+                  :closable="false"
+                />
+              </div>
+            </template>
           </div>
         </el-form-item>
         
@@ -64,7 +74,14 @@
           </el-form-item>
           
           <div v-if="compressedSizeEstimate" class="form-hint">
-            Estimated compressed size: {{ compressedSizeEstimate }}
+            <div class="model-size-info-container">
+              <el-alert
+                type="info"
+                :title="`Estimated compressed size: ${compressedSizeEstimate}`"
+                show-icon
+                :closable="false"
+              />
+            </div>
           </div>
         </template>
       </el-form>
@@ -142,12 +159,59 @@ export default {
     const isCheckingSize = computed(() => store.state.model.isCheckingSize);
     const isStartingDownload = ref(false);
     
-    // 模型大小信息
+    // 模型大小信息展示相关
     const modelSizeInfo = computed(() => {
-      if (store.getters['model/modelSizeFormatted']) {
-        return `Model size: ${store.getters['model/modelSizeFormatted']} - ${store.getters['model/modelSizeMessage']}`;
+      const sizeFormatted = store.getters['model/modelSizeFormatted'];
+      const sizeMessage = store.getters['model/modelSizeMessage'];
+      
+      if (sizeFormatted) {
+        return `Model size: ${sizeFormatted} - ${sizeMessage}`;
       }
       return '';
+    });
+    
+    // 简化后的模型大小显示
+    const modelSizeDisplay = computed(() => {
+      const sizeFormatted = store.getters['model/modelSizeFormatted'];
+      
+      if (!sizeFormatted) {
+        const modelInfo = store.state.model.modelSizeInfo;
+        if (modelInfo && modelInfo.message && modelInfo.message.toLowerCase().includes('error')) {
+          return `Error: Unable to determine model size`;
+        }
+        return 'Model size unavailable';
+      }
+      
+      return `Model size: ${sizeFormatted}`;
+    });
+    
+    const modelSizeAlertType = computed(() => {
+      const modelInfo = store.state.model.modelSizeInfo;
+      if (!modelInfo) return 'info';
+      
+      // 如果是错误消息，使用警告色
+      if (modelInfo.message && modelInfo.message.toLowerCase().includes('error')) {
+        return 'warning';
+      }
+      
+      // 根据模型大小判断提示类型
+      const size = modelInfo.sizeGB || 0;
+      if (size === 0) return 'warning';
+      if (size > 50) return 'warning'; // 大模型警告
+      if (size > 10) return 'info';
+      return 'success';
+    });
+    
+    const modelSizeTitle = computed(() => {
+      const sizeFormatted = store.getters['model/modelSizeFormatted'];
+      if (!sizeFormatted) {
+        return 'Model size unavailable';
+      }
+      return `Model size: ${sizeFormatted}`;
+    });
+    
+    const modelSizeDescription = computed(() => {
+      return store.getters['model/modelSizeMessage'] || '';
     });
     
     // 压缩大小估计
@@ -268,6 +332,10 @@ export default {
       isCheckingSize,
       isStartingDownload,
       modelSizeInfo,
+      modelSizeDisplay,
+      modelSizeAlertType,
+      modelSizeTitle,
+      modelSizeDescription,
       compressedSizeEstimate,
       currentTask,
       taskStatusType,
@@ -277,6 +345,7 @@ export default {
       handleStartDownload,
       handleCancelDownload,
       formatBytes,
+      store,
     };
   },
 };
@@ -303,6 +372,29 @@ export default {
   color: #909399;
   margin-top: 0.5rem;
   line-height: 1.4;
+}
+
+/* 模型大小信息容器样式 */
+.model-size-info-container {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+/* 自定义Alert样式 */
+.model-size-info-container :deep(.el-alert) {
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.model-size-info-container :deep(.el-alert__title) {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.model-size-info-container :deep(.el-alert__icon) {
+  font-size: 16px;
+  margin-right: 8px;
 }
 
 .form-actions {
