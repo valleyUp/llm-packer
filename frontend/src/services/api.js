@@ -35,10 +35,18 @@ apiClient.interceptors.response.use(
 const api = {
   // 检查模型大小
   checkModelSize(params) {
-    return apiClient.post('/check-size', params)
+    console.log('发送检查模型大小请求:', params);
+    return apiClient.post('/check-size', params, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        console.log(`${params.source}模型大小响应成功:`, response);
+        return response;
+      })
       .catch(error => {
-        console.error('API error in checkModelSize:', error);
-        // 重新抛出错误，让 store 来处理
+        console.error(`${params.source}模型大小请求错误:`, error.response || error);
         throw error;
       });
   },

@@ -73,7 +73,7 @@
             </el-select>
           </el-form-item>
           
-          <div v-if="compressedSizeEstimate" class="form-hint">
+          <el-form-item label=" " v-if="compressedSizeEstimate">
             <div class="model-size-info-container">
               <el-alert
                 type="info"
@@ -82,7 +82,7 @@
                 :closable="false"
               />
             </div>
-          </div>
+          </el-form-item>
         </template>
       </el-form>
       
@@ -173,16 +173,33 @@ export default {
     // 简化后的模型大小显示
     const modelSizeDisplay = computed(() => {
       const sizeFormatted = store.getters['model/modelSizeFormatted'];
+      const modelInfo = store.state.model.modelSizeInfo;
       
-      if (!sizeFormatted) {
-        const modelInfo = store.state.model.modelSizeInfo;
-        if (modelInfo && modelInfo.message && modelInfo.message.toLowerCase().includes('error')) {
-          return `Error: Unable to determine model size`;
+      console.log('Computing modelSizeDisplay:', { 
+        sizeFormatted, 
+        modelInfo,
+        source: form.value.source
+      });
+      
+      // 直接检查模型信息和大小值
+      if (modelInfo && modelInfo.sizeGB) {
+        const sizeGB = parseFloat(modelInfo.sizeGB);
+        if (!isNaN(sizeGB) && sizeGB > 0) {
+          return `Model size: ${sizeGB.toFixed(2)} GB`;
         }
-        return 'Model size unavailable';
       }
       
-      return `Model size: ${sizeFormatted}`;
+      // 如果上述处理失败，回退到使用getter
+      if (sizeFormatted) {
+        return `Model size: ${sizeFormatted.replace(' GB', '')} GB`;
+      }
+      
+      // 错误处理
+      if (modelInfo && modelInfo.message && modelInfo.message.toLowerCase().includes('error')) {
+        return `Error: Unable to determine model size`;
+      }
+      
+      return 'Model size unavailable';
     });
     
     const modelSizeAlertType = computed(() => {
