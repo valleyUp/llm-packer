@@ -23,6 +23,10 @@
                   show-icon
                   :closable="false"
                 />
+                <!-- 调试信息 - 仅在开发模式下显示 -->
+                <div v-if="isDev" class="debug-info">
+                  <pre>{{ JSON.stringify(store.state.model.modelSizeInfo, null, 2) }}</pre>
+                </div>
               </div>
             </template>
           </div>
@@ -141,6 +145,9 @@ export default {
   setup() {
     const store = useStore();
     
+    // 开发模式标志
+    const isDev = process.env.NODE_ENV === 'development';
+    
     // 表单数据
     const form = ref({
       source: 'huggingface',
@@ -170,28 +177,47 @@ export default {
       return '';
     });
     
-    // 简化后的模型大小显示
+    // 简化后的模型大小显示 - 紧急修复版本
     const modelSizeDisplay = computed(() => {
-      const sizeFormatted = store.getters['model/modelSizeFormatted'];
       const modelInfo = store.state.model.modelSizeInfo;
       
-      console.log('Computing modelSizeDisplay:', { 
-        sizeFormatted, 
+      // 详细记录所有信息
+      console.log('Computing modelSizeDisplay - 紧急修复版本:', { 
         modelInfo,
-        source: form.value.source
+        source: form.value.source,
+        rawSizeGB: modelInfo?.sizeGB,
+        sizeGBType: modelInfo?.sizeGB !== undefined ? typeof modelInfo.sizeGB : 'undefined'
       });
       
-      // 直接检查模型信息和大小值
-      if (modelInfo && modelInfo.sizeGB) {
-        const sizeGB = parseFloat(modelInfo.sizeGB);
-        if (!isNaN(sizeGB) && sizeGB > 0) {
-          return `Model size: ${sizeGB.toFixed(2)} GB`;
+      // 如果有模型信息，直接展示
+      if (modelInfo) {
+        let sizeValue;
+        
+        // 尝试多种方式获取大小值
+        try {
+          // 先尝试直接获取数值
+          sizeValue = Number(modelInfo.sizeGB);
+          
+          // 如果是NaN，可能是字符串需要解析
+          if (isNaN(sizeValue) && typeof modelInfo.sizeGB === 'string') {
+            // 可能是JSON字符串
+            try {
+              const parsed = JSON.parse(modelInfo.sizeGB);
+              sizeValue = Number(parsed);
+            } catch (e) {
+              console.log('不是有效的JSON字符串');
+            }
+          }
+          
+          console.log('最终计算的大小值:', sizeValue);
+          
+          // 如果有有效值，直接显示
+          if (!isNaN(sizeValue) && sizeValue > 0) {
+            return `Model size: ${sizeValue.toFixed(2)} GB`;
+          }
+        } catch (e) {
+          console.error('处理大小值时出错:', e);
         }
-      }
-      
-      // 如果上述处理失败，回退到使用getter
-      if (sizeFormatted) {
-        return `Model size: ${sizeFormatted.replace(' GB', '')} GB`;
       }
       
       // 错误处理
@@ -363,6 +389,7 @@ export default {
       handleCancelDownload,
       formatBytes,
       store,
+      isDev,
     };
   },
 };
@@ -412,6 +439,18 @@ export default {
 .model-size-info-container :deep(.el-alert__icon) {
   font-size: 16px;
   margin-right: 8px;
+}
+
+/* 调试信息样式 */
+.debug-info {
+  margin-top: 10px;
+  padding: 8px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  overflow-x: auto;
 }
 
 .form-actions {

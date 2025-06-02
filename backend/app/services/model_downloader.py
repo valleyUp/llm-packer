@@ -204,37 +204,52 @@ class ModelDownloader:
         if not MS_AVAILABLE:
             return 0.0, "Error: modelscope SDK not installed"
         
-        ms_api = HubApi()
-        if token:
-            try:
-                ms_api.login(token)
-            except Exception as e:
-                logger.error(f"Failed to login to ModelScope: {str(e)}")
-                return 0.0, f"Error: Failed to login - {str(e)}"
+        logger.info(f"Checking size for ModelScope model: {model_id}")
+        
+        total_size_bytes = 0
+        error_message = None
         
         try:
-            # 获取模型信息
-            model_info = ms_api.get_model(model_id)
-            logger.info(f"Model info: {model_info}")
+            # 初始化ModelScope API
+            hub_api = HubApi()
+            if token:
+                hub_api.login(token)
             
-            # 获取带有详细信息的模型文件
-            files = ms_api.get_model_files(model_id)
-            logger.info(f"Model files: {files}")
+            # 获取模型文件列表
+            logger.info(f"Fetching model file list for: {model_id}")
+            files = hub_api.get_model_files(model_id=model_id, recursive=True)
             
             if not files:
-                return 0.0, "Error: No files found in model repository"
+                error_message = "No files found in the repository"
+                logger.warning(error_message)
+                return 0.0, f"Error: {error_message}"
             
-            total_size_bytes = 0
+            logger.info(f"Found {len(files)} files in the repository")
+            
+            # 计算所有文件的总大小
             for file in files:
-                if isinstance(file, dict) and "size" in file:
-                    total_size_bytes += int(file["size"])
-                    
-            total_size_gb = total_size_bytes / (1024 ** 3)
-            return total_size_gb, f"Total size of all weights: {total_size_gb:.2f} GB"
+                if isinstance(file, dict) and "Size" in file and file["Type"] == "blob":
+                    file_size = int(file["Size"])
+                    total_size_bytes += file_size
+                    logger.debug(f"File {file.get('Path', 'unknown')}: {file_size} bytes")
             
+            logger.info(f"Total size calculated from files: {total_size_bytes} bytes")
+            
+            # 计算以GB为单位的大小
+            total_size_gb = total_size_bytes / (1024 ** 3) if total_size_bytes > 0 else 0.0
+            
+            # 返回结果
+            if total_size_gb > 0:
+                return total_size_gb, f"Total size of all weights: {total_size_gb:.2f} GB"
+            else:
+                error_message = "Could not determine model size (sum of file sizes is 0)"
+                logger.warning(error_message)
+                return 0.0, f"Error: {error_message}"
+                
         except Exception as e:
-            logger.error(f"Failed to get model info/files for {model_id}: {str(e)}")
-            return 0.0, f"Error: Failed to get model info/files - {str(e)}"
+            error_message = str(e)
+            logger.error(f"Error getting size for ModelScope model {model_id}: {error_message}")
+            return 0.0, f"Error: {error_message}"
 
     def download_huggingface_model(self, task_id: str, model_id: str, save_path: Optional[str],
                                token: Optional[str], hf_mirror: Optional[str], file_filter: Optional[str] = None,

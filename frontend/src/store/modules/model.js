@@ -39,39 +39,77 @@ export default {
           authToken,
         });
         
-        console.log(`收到${source}模型大小响应:`, response);
+        // 记录原始响应
+        console.log(`收到${source}原始响应:`, response);
+        console.log(`响应数据类型:`, typeof response.data);
+        console.log(`响应数据:`, JSON.stringify(response.data, null, 2));
         
         // 更严格的响应数据验证
         if (!response || !response.data) {
           throw new Error('Invalid response from server: No data received');
         }
         
-        // 验证数据包含必要字段，处理不同源的响应格式
-        const responseData = response.data;
-        console.log(`${source}响应数据字段:`, Object.keys(responseData));
-        
-        // 确保sizeGB是数值类型
-        let sizeGB = responseData.sizeGB;
-        if (typeof sizeGB === 'string') {
-          sizeGB = parseFloat(sizeGB);
+        // 不同源的处理方式可能不同
+        let modelSizeInfo;
+        if (source === 'modelscope') {
+          // 处理ModelScope响应 - 内联实现
+          console.log('处理ModelScope响应:', response.data);
+          const data = response.data;
+          let sizeGB = 0;
+          
+          try {
+            // 尝试多种方式提取大小值
+            if (typeof data.sizeGB === 'number') {
+              sizeGB = data.sizeGB;
+            } else if (typeof data.sizeGB === 'string') {
+              sizeGB = parseFloat(data.sizeGB);
+            }
+            
+            // 如果还是无效，尝试从消息中提取
+            if (isNaN(sizeGB) || sizeGB <= 0) {
+              const message = data.message || '';
+              const sizeMatch = message.match(/(\d+\.\d+)\s*GB/);
+              if (sizeMatch && sizeMatch[1]) {
+                sizeGB = parseFloat(sizeMatch[1]);
+              }
+            }
+          } catch (e) {
+            console.error('处理ModelScope大小信息时出错:', e);
+          }
+          
+          modelSizeInfo = {
+            sizeGB: isNaN(sizeGB) ? 0 : sizeGB,
+            message: data.message || ''
+          };
+        } else {
+          // 直接处理响应数据，不进行类型验证
+          const responseData = response.data;
+          console.log(`${source}响应数据字段:`, Object.keys(responseData));
+          
+          // 直接提取数值并转换 - 强制处理
+          let sizeGB;
+          try {
+            sizeGB = parseFloat(responseData.sizeGB);
+            if (isNaN(sizeGB)) sizeGB = 0;
+          } catch (e) {
+            console.error('解析sizeGB时出错:', e);
+            sizeGB = 0;
+          }
+          
+          // 强制确保我们有有效数据
+          modelSizeInfo = {
+            sizeGB: sizeGB,
+            message: String(responseData.message || '')
+          };
         }
         
-        // 标准化响应数据格式
-        const modelSizeInfo = {
-          sizeGB: typeof sizeGB === 'number' && !isNaN(sizeGB) ? sizeGB : 0,
-          message: responseData.message || ''
-        };
-        
         console.log(`${source}标准化后的模型大小信息:`, modelSizeInfo);
-        
-        // 明确记录是否该显示模型大小
-        const shouldShowSize = modelSizeInfo.sizeGB > 0;
-        console.log(`${source}模型应该显示大小?: ${shouldShowSize}, sizeGB=${modelSizeInfo.sizeGB}`);
+        console.log(`${source}模型应该显示大小?: ${modelSizeInfo.sizeGB > 0}, sizeGB=${modelSizeInfo.sizeGB}`);
         
         // 设置模型大小信息
         commit('SET_MODEL_SIZE_INFO', modelSizeInfo);
         
-        return responseData;
+        return response.data;
       } catch (error) {
         console.error(`检查${source}模型大小时出错:`, error);
         // 设置错误状态，但同时也提供空的模型大小信息，以确保UI能正确显示
@@ -85,6 +123,8 @@ export default {
         commit('SET_CHECKING_SIZE', false);
       }
     },
+    
+    // 清除模型大小信息
     
     // 清除模型大小信息
     clearModelSizeInfo({ commit }) {
