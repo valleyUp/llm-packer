@@ -32,17 +32,11 @@ export default {
       commit('CLEAR_ERROR');
       
       try {
-        console.log(`开始检查${source}模型大小:`, { source, modelId });
         const response = await api.checkModelSize({
           source,
           modelId,
           authToken,
         });
-        
-        // 记录原始响应
-        console.log(`收到${source}原始响应:`, response);
-        console.log(`响应数据类型:`, typeof response.data);
-        console.log(`响应数据:`, JSON.stringify(response.data, null, 2));
         
         // 更严格的响应数据验证
         if (!response || !response.data) {
@@ -53,7 +47,6 @@ export default {
         let modelSizeInfo;
         if (source === 'modelscope') {
           // 处理ModelScope响应 - 内联实现
-          console.log('处理ModelScope响应:', response.data);
           const data = response.data;
           let sizeGB = 0;
           
@@ -74,7 +67,7 @@ export default {
               }
             }
           } catch (e) {
-            console.error('处理ModelScope大小信息时出错:', e);
+            // 静默处理错误
           }
           
           modelSizeInfo = {
@@ -84,7 +77,6 @@ export default {
         } else {
           // 直接处理响应数据，不进行类型验证
           const responseData = response.data;
-          console.log(`${source}响应数据字段:`, Object.keys(responseData));
           
           // 直接提取数值并转换 - 强制处理
           let sizeGB;
@@ -92,7 +84,6 @@ export default {
             sizeGB = parseFloat(responseData.sizeGB);
             if (isNaN(sizeGB)) sizeGB = 0;
           } catch (e) {
-            console.error('解析sizeGB时出错:', e);
             sizeGB = 0;
           }
           
@@ -103,15 +94,11 @@ export default {
           };
         }
         
-        console.log(`${source}标准化后的模型大小信息:`, modelSizeInfo);
-        console.log(`${source}模型应该显示大小?: ${modelSizeInfo.sizeGB > 0}, sizeGB=${modelSizeInfo.sizeGB}`);
-        
         // 设置模型大小信息
         commit('SET_MODEL_SIZE_INFO', modelSizeInfo);
         
         return response.data;
       } catch (error) {
-        console.error(`检查${source}模型大小时出错:`, error);
         // 设置错误状态，但同时也提供空的模型大小信息，以确保UI能正确显示
         commit('SET_MODEL_SIZE_INFO', {
           sizeGB: 0,
@@ -133,12 +120,8 @@ export default {
   },
   
   getters: {
-    modelSizeFormatted(state) {
-      // 提供详细日志
-      console.log('modelSizeFormatted执行:', state.modelSizeInfo);
-      
+    modelSizeFormatted(state) {      
       if (!state.modelSizeInfo) {
-        console.log('无模型大小信息');
         return null;
       }
       
@@ -146,26 +129,21 @@ export default {
       let sizeGB;
       
       if (state.modelSizeInfo.sizeGB === undefined || state.modelSizeInfo.sizeGB === null) {
-        console.log('sizeGB字段不存在');
         return null;
       }
       
       if (typeof state.modelSizeInfo.sizeGB === 'string') {
         sizeGB = parseFloat(state.modelSizeInfo.sizeGB);
-        console.log('sizeGB是字符串，解析为:', sizeGB);
       } else {
         sizeGB = state.modelSizeInfo.sizeGB;
-        console.log('sizeGB是数值:', sizeGB);
       }
       
       // 更严格的条件检查
       if (isNaN(sizeGB) || sizeGB <= 0) {
-        console.log('sizeGB无效或为0');
         return null;
       }
       
       // 格式化为2位小数
-      console.log('返回格式化的大小:', `${sizeGB.toFixed(2)} GB`);
       return `${sizeGB.toFixed(2)} GB`;
     },
     

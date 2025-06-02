@@ -23,10 +23,6 @@
                   show-icon
                   :closable="false"
                 />
-                <!-- 调试信息 - 仅在开发模式下显示 -->
-                <div v-if="isDev" class="debug-info">
-                  <pre>{{ JSON.stringify(store.state.model.modelSizeInfo, null, 2) }}</pre>
-                </div>
               </div>
             </template>
           </div>
@@ -177,17 +173,9 @@ export default {
       return '';
     });
     
-    // 简化后的模型大小显示 - 紧急修复版本
+    // 简化后的模型大小显示
     const modelSizeDisplay = computed(() => {
       const modelInfo = store.state.model.modelSizeInfo;
-      
-      // 详细记录所有信息
-      console.log('Computing modelSizeDisplay - 紧急修复版本:', { 
-        modelInfo,
-        source: form.value.source,
-        rawSizeGB: modelInfo?.sizeGB,
-        sizeGBType: modelInfo?.sizeGB !== undefined ? typeof modelInfo.sizeGB : 'undefined'
-      });
       
       // 如果有模型信息，直接展示
       if (modelInfo) {
@@ -205,18 +193,16 @@ export default {
               const parsed = JSON.parse(modelInfo.sizeGB);
               sizeValue = Number(parsed);
             } catch (e) {
-              console.log('不是有效的JSON字符串');
+              // 解析失败，跳过
             }
           }
-          
-          console.log('最终计算的大小值:', sizeValue);
           
           // 如果有有效值，直接显示
           if (!isNaN(sizeValue) && sizeValue > 0) {
             return `Model size: ${sizeValue.toFixed(2)} GB`;
           }
         } catch (e) {
-          console.error('处理大小值时出错:', e);
+          // 静默处理错误
         }
       }
       
@@ -240,7 +226,7 @@ export default {
       // 根据模型大小判断提示类型
       const size = modelInfo.sizeGB || 0;
       if (size === 0) return 'warning';
-      if (size > 50) return 'warning'; // 大模型警告
+      if (size > 50) return 'success'; // 大模型使用成功色
       if (size > 10) return 'info';
       return 'success';
     });
