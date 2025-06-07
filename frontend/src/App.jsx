@@ -21,9 +21,6 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <h1 className="app-title">LLM Weights Downloader</h1>
-      </header>
       <nav className="app-nav">
         <div className="nav-tabs">
           <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Download</Link>

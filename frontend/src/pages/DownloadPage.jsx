@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { TaskContext } from '../TaskContext';
 import { api } from '../api';
+import downloadIcon from '../assets/download-icon.svg';
 
 export default function DownloadPage() {
   const { currentTask, startDownload, cancelTask } = useContext(TaskContext);
@@ -49,6 +50,14 @@ export default function DownloadPage() {
 
   return (
     <div className="page">
+      <section className="hero">
+        <div className="hero-text">
+          <img src={downloadIcon} alt="download" className="hero-icon" />
+          <h1>LLM Weights Downloader</h1>
+          <p>Fast, reliable model downloads and archiving.</p>
+        </div>
+        <img className="hero-img" src="https://source.unsplash.com/featured/?machine-learning" alt="AI abstract" />
+      </section>
       <h2>Download Model</h2>
       <div className="form-section">
         <label>
