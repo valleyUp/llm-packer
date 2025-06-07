@@ -51,14 +51,14 @@ export default function ArchivePage() {
           </select>
         </label>
         {error && <div className="error">{error}</div>}
-        <button onClick={handleStart}>Start</button>
+        <button className="btn-primary" onClick={handleStart}>Start</button>
       </div>
       {currentTask && (
         <div className="task-status">
           <h3>Status: {currentTask.status}</h3>
           <progress value={currentTask.progress || 0} max="100" />
           <div>{Math.round(currentTask.progress || 0)}%</div>
-          <button onClick={() => cancelTask(currentTask.taskId)}>Cancel</button>
+          <button className="btn-secondary" onClick={() => cancelTask(currentTask.taskId)}>Cancel</button>
         </div>
       )}
     </div>

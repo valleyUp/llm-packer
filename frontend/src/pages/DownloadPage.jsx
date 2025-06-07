@@ -80,7 +80,7 @@ export default function DownloadPage() {
           File Filter
           <input name="fileFilter" value={form.fileFilter} onChange={handleChange} />
         </label>
-        <button onClick={handleCheckSize} disabled={checking}>Check Size</button>
+        <button className="btn-secondary" onClick={handleCheckSize} disabled={checking}>Check Size</button>
         {sizeInfo && (
           <div className="size-info">Size: {sizeInfo.sizeGB} GB {sizeInfo.message}</div>
         )}
@@ -110,7 +110,7 @@ export default function DownloadPage() {
           </div>
         )}
         {error && <div className="error">{error}</div>}
-        <button onClick={handleStart}>Start Download</button>
+        <button className="btn-primary" onClick={handleStart}>Start Download</button>
       </div>
 
       {currentTask && (
@@ -118,7 +118,7 @@ export default function DownloadPage() {
           <h3>Status: {currentTask.status}</h3>
           <progress value={currentTask.progress || 0} max="100" />
           <div>{Math.round(currentTask.progress || 0)}%</div>
-          <button onClick={() => cancelTask(currentTask.taskId)}>Cancel</button>
+          <button className="btn-secondary" onClick={() => cancelTask(currentTask.taskId)}>Cancel</button>
         </div>
       )}
     </div>
