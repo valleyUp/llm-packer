@@ -72,6 +72,16 @@ npm run serve
 
 前端将在 http://localhost:8080 上启动。
 
+### React 版界面
+
+项目还提供了使用 React 构建的实验性界面，位于 `frontend/react-app` 目录。启动方式如下：
+
+```bash
+cd frontend/react-app
+npm install
+npm run dev
+```
+
 ## 环境变量
 
 可以通过创建 `.env` 文件或设置环境变量来配置应用程序：

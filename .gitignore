@@ -222,6 +222,7 @@ build/Release
 
 # Dependency directories
 frontend/node_modules/
+frontend/react-app/node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)

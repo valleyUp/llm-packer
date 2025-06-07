@@ -1,0 +1,89 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #f2f2f2;
+  color: #333;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background: #fff;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #e5e5e5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.app-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #007aff;
+}
+
+.app-nav {
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.nav-tabs {
+  display: flex;
+  position: relative;
+  height: 48px;
+}
+
+.nav-tabs a {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #555;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-tabs a.active {
+  color: #007aff;
+}
+
+.nav-tabs a:hover {
+  color: #007aff;
+}
+
+.nav-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  background: #007aff;
+  border-radius: 3px 3px 0 0;
+  transition: left 0.3s ease;
+}
+
+.app-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 1rem;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin-top: 0;
+  color: #007aff;
+}
