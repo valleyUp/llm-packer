@@ -27,12 +27,11 @@
 │   ├── requirements.txt      # Python依赖
 │   └── run.py                # 启动脚本
 ├── frontend/                 # 前端代码
-│   ├── public/               # 静态资源
-│   └── src/                  # 源代码
-│       ├── components/       # Vue组件
-│       ├── services/         # API服务
-│       ├── store/            # Vuex存储
-│       └── views/            # 页面视图
+│   ├── index.html            # 应用入口
+│   ├── src/                  # 源代码
+│   │   ├── pages/            # 页面组件
+│   │   ├── TaskContext.jsx   # 任务状态管理
+│   │   └── other React files
 └── README.md                 # 项目说明
 ```
 
@@ -67,20 +66,10 @@ npm install
 2. 运行开发服务器：
 
 ```bash
-npm run serve
-```
-
-前端将在 http://localhost:8080 上启动。
-
-### React 版界面
-
-项目还提供了使用 React 构建的实验性界面，位于 `frontend/react-app` 目录。启动方式如下：
-
-```bash
-cd frontend/react-app
-npm install
 npm run dev
 ```
+
+默认将在 http://localhost:5173 上启动。
 
 ## 环境变量
 
