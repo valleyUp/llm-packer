@@ -9,6 +9,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { TaskContext } from '../TaskContext';
+import CustomSelect from '../components/CustomSelect';
 
 export default function ArchivePage() {
   const { currentTask, archiveModel, cancelTask } = useContext(TaskContext);
@@ -98,13 +99,18 @@ export default function ArchivePage() {
           <div className="form-group">
             <label>
               Archive Format
-              <select name="archiveFormat" value={form.archiveFormat} onChange={handleChange} className="select-with-emoji">
-                <option value="zip">📦 ZIP (Fast, Compatible)</option>
-                <option value="tar">📄 TAR (Uncompressed)</option>
-                <option value="gztar">🗜️ TAR.GZ (Good Compression)</option>
-                <option value="bztar">🗜️ TAR.BZ2 (Better Compression)</option>
-                <option value="xztar">🗜️ TAR.XZ (Best Compression)</option>
-              </select>
+              <CustomSelect
+                name="archiveFormat"
+                value={form.archiveFormat}
+                onChange={handleChange}
+                options={[
+                  { value: 'zip', label: '📦 ZIP (Fast, Compatible)' },
+                  { value: 'tar', label: '📄 TAR (Uncompressed)' },
+                  { value: 'gztar', label: '🗜️ TAR.GZ (Good Compression)' },
+                  { value: 'bztar', label: '🗜️ TAR.BZ2 (Better Compression)' },
+                  { value: 'xztar', label: '🗜️ TAR.XZ (Best Compression)' }
+                ]}
+              />
             </label>
           </div>
         </div>

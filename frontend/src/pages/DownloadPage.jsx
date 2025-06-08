@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { TaskContext } from '../TaskContext';
 import { api } from '../api';
+import CustomSelect from '../components/CustomSelect';
 
 export default function DownloadPage() {
   const { currentTask, startDownload, cancelTask } = useContext(TaskContext);
@@ -103,10 +104,15 @@ export default function DownloadPage() {
             <div className="form-group">
               <label>
                 Source Platform
-                <select name="source" value={form.source} onChange={handleChange} className="select-with-emoji">
-                  <option value="huggingface">🤗 Hugging Face</option>
-                  <option value="modelscope">🔬 ModelScope</option>
-                </select>
+                <CustomSelect
+                  name="source"
+                  value={form.source}
+                  onChange={handleChange}
+                  options={[
+                    { value: 'huggingface', label: '🤗 Hugging Face' },
+                    { value: 'modelscope', label: '🔬 ModelScope' }
+                  ]}
+                />
               </label>
             </div>
             <div className="form-group">
@@ -206,12 +212,9 @@ export default function DownloadPage() {
             </button>
 
             {sizeInfo && (
-              <div className="size-info-card">
-                <CheckCircle className="text-success" />
-                <div>
-                  <strong>Size: {sizeInfo.sizeGB} GB</strong>
-                  <p>{sizeInfo.message}</p>
-                </div>
+              <div className="size-info-compact">
+                <CheckCircle />
+                <span>{parseFloat(sizeInfo.sizeGB).toFixed(2)} GB</span>
               </div>
             )}
           </div>
@@ -276,13 +279,18 @@ export default function DownloadPage() {
                 <div className="form-group">
                   <label>
                     Archive Format
-                    <select name="archiveFormat" value={form.archiveFormat} onChange={handleChange} className="select-with-emoji">
-                      <option value="zip">📦 ZIP (Recommended)</option>
-                      <option value="tar">📄 TAR</option>
-                      <option value="gztar">🗜️ TAR.GZ (Compressed)</option>
-                      <option value="bztar">🗜️ TAR.BZ2 (High Compression)</option>
-                      <option value="xztar">🗜️ TAR.XZ (Best Compression)</option>
-                    </select>
+                    <CustomSelect
+                      name="archiveFormat"
+                      value={form.archiveFormat}
+                      onChange={handleChange}
+                      options={[
+                        { value: 'zip', label: '📦 ZIP (Recommended)' },
+                        { value: 'tar', label: '📄 TAR' },
+                        { value: 'gztar', label: '🗜️ TAR.GZ (Compressed)' },
+                        { value: 'bztar', label: '🗜️ TAR.BZ2 (High Compression)' },
+                        { value: 'xztar', label: '🗜️ TAR.XZ (Best Compression)' }
+                      ]}
+                    />
                   </label>
                 </div>
               </div>
