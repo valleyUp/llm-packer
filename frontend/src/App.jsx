@@ -1,5 +1,6 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Download, Archive, Clock, Info } from 'lucide-react';
 import DownloadPage from './pages/DownloadPage';
 import ArchivePage from './pages/ArchivePage';
 import HistoryPage from './pages/HistoryPage';
@@ -14,8 +15,15 @@ export default function App() {
     const routes = ['/', '/archive', '/history', '/about'];
     const index = routes.indexOf(location.pathname);
     if (index !== -1) {
-      const width = 25;
-      setIndicatorStyle({ left: `${width * index}%`, width: `${width}%` });
+      // Calculate position to center the indicator under each tab
+      const tabWidth = 100 / routes.length; // 25% for 4 tabs
+      const indicatorWidth = tabWidth - 2; // Slightly smaller for better visual
+      const left = (tabWidth * index) + 1; // Add 1% offset for centering
+
+      setIndicatorStyle({
+        left: `${left}%`,
+        width: `${indicatorWidth}%`
+      });
     }
   }, [location]);
 
@@ -23,10 +31,22 @@ export default function App() {
     <div className="app-container">
       <nav className="app-nav">
         <div className="nav-tabs">
-          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Download</Link>
-          <Link to="/archive" className={location.pathname === '/archive' ? 'active' : ''}>Archive</Link>
-          <Link to="/history" className={location.pathname === '/history' ? 'active' : ''}>History</Link>
-          <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>About</Link>
+          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
+            <Download />
+            Download
+          </Link>
+          <Link to="/archive" className={location.pathname === '/archive' ? 'active' : ''}>
+            <Archive />
+            Archive
+          </Link>
+          <Link to="/history" className={location.pathname === '/history' ? 'active' : ''}>
+            <Clock />
+            History
+          </Link>
+          <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>
+            <Info />
+            About
+          </Link>
           <div className="nav-indicator" style={indicatorStyle} />
         </div>
       </nav>
